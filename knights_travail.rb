@@ -1,27 +1,25 @@
-require 'byebug'
-require './00_tree_node.rb'
+require './tree_node.rb'
 
 class KnightPathFinder
   attr_accessor :visited_squares, :root_node, :position
 
   def initialize(pos)
-    @position = pos
-    @visited_squares = [pos]
-    @root_node = PolyTreeNode.new(pos)
-    build_move_tree(@root_node)
+    @position, @visited_squares, @root_node = pos, [pos], PolyTreeNode.new(pos)
+    build_move_tree(root_node)
   end
 
   def build_move_tree(node)
     pos = node.value
     possible_moves = get_children(node)
 
-    possible_moves.each do |move_node|
-        build_move_tree(move_node)
+    possible_moves.each do |move|
+        build_move_tree(move)
     end
   end
 
   def get_children(node)
     created_nodes = []
+
     [1, -1].each do |x|
       [2, -2].each do |y|
         offsets = [x, y]
@@ -30,15 +28,16 @@ class KnightPathFinder
           offsets.rotate!
           next unless valid_move?(pos)
           created_nodes << create_move_node(pos, node)
-          @visited_squares << pos
+          visited_squares << pos
         end
       end
     end
+
     created_nodes
   end
 
   def valid_move?(pos)
-    on_board?(pos) && !@visited_squares.include?(pos)
+    on_board?(pos) && !visited_squares.include?(pos)
   end
 
   def create_move_node(pos, parent)
@@ -52,7 +51,7 @@ class KnightPathFinder
   end
 
   def find_path(end_pos)
-    end_node = @root_node.dfs(end_pos)
+    end_node = root_node.depth_first_search(end_pos)
     end_node.trace_path_back.reverse
   end
 end
